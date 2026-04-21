@@ -232,4 +232,3 @@ while True:
   sistema.loop()
   print(sistema.tempo_ativo)
   time.sleep(1)
-  break # Porque o Actions reclamou de timeout, remover ao testar.
