@@ -21,6 +21,8 @@ O objetivo é criar um sistema embarcado capaz de:
 * Pressionar o botão alterna entre diferentes modos de operação (segurar por ~1s para reconhecer)
 * Sensores PIR simulam presença de veículos, influenciando o tempo dos semáforos (Sensor adjacente de seu respectivo semáforo)
 
+![](images/circuit.png)
+
 
 ## 2️⃣ Arquitetura do Sistema Embarcado
 
