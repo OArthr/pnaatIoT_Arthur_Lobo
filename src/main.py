@@ -1,6 +1,7 @@
 from machine import Pin 
 import time
 
+print("Teste")
 # -------------------- PINOS ------------------
 
 # Pinos do shift register
