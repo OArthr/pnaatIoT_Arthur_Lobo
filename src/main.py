@@ -231,4 +231,5 @@ sistema = SistemaSemaforo(semaforos, sensores, botao, ModosConfig)
 while True:
   sistema.loop()
   print(sistema.tempo_ativo)
+  break # Testando se o actions aceita, REMOVER AO TESTAR
   time.sleep(1)
