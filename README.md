@@ -2,7 +2,7 @@
 
 ## 👤 Identificação do Candidato
 
-* **Nome completo:** Arthur Lobo Feitosa de Oliveira
+- **Nome completo:** Arthur Lobo Feitosa de Oliveira
 * **GitHub:** [OArthr](https://github.com/OArthr)
 
 
