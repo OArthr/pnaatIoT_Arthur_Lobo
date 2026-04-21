@@ -32,7 +32,7 @@
       "top": 210,
       "left": -108.6,
       "rotate": 90,
-      "attrs": { "color": "limegreen" }
+      "attrs": { "color": "green" }
     },
     {
       "type": "wokwi-led",
@@ -56,7 +56,7 @@
       "top": 104.8,
       "left": 49.4,
       "rotate": 270,
-      "attrs": { "color": "limegreen" }
+      "attrs": { "color": "green" }
     },
     {
       "type": "wokwi-led",
@@ -80,7 +80,7 @@
       "top": 316,
       "left": 135.8,
       "rotate": 270,
-      "attrs": { "color": "limegreen" }
+      "attrs": { "color": "green" }
     },
     {
       "type": "wokwi-led",
@@ -104,7 +104,7 @@
       "top": 411.6,
       "left": -31.8,
       "rotate": 90,
-      "attrs": { "color": "limegreen" }
+      "attrs": { "color": "green" }
     },
     { "type": "wokwi-pir-motion-sensor", "id": "pir1", "top": 71.2, "left": -45.78, "attrs": {} },
     { "type": "wokwi-pir-motion-sensor", "id": "pir2", "top": 186.4, "left": 117.42, "attrs": {} },

@@ -2,8 +2,8 @@
 
 ## 👤 Identificação do Candidato
 
-- **Nome completo:** Arthur Lobo Feitosa de Oliveira
-- **GitHub:** [OArthr](https://github.com/OArthr)
+* **Nome completo:** Arthur Lobo Feitosa de Oliveira
+* **GitHub:** [OArthr](https://github.com/OArthr)
 
 
 ## 1️⃣ Visão Geral da Solução
