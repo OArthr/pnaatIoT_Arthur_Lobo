@@ -2,7 +2,7 @@ from machine import Pin
 import time
 
 print("Teste")
-# -------------------- PINOS ------------------
+# ------------------ PINOS ------------------
 
 # Pinos do shift register
 data = Pin(19, Pin.OUT)   # envia os bits
@@ -20,7 +20,7 @@ sensores = [
   Pin(2, Pin.IN)
 ]
 
-# ---------------- CONSTANTES -------------------
+# ------------------ CONSTANTES ------------------
 
 # Estados do semáforo
 OFF = 0
@@ -39,7 +39,7 @@ MODOS = 4          # quantidade de modos de operação
 # Buffer de 16 bits representando os LEDs
 led_buffer = [0] * 16
 
-# ----------------- CLASSE SEMÁFORO --------------------
+# ------------------ CLASSE SEMÁFORO ------------------
 
 class Semaforo:
   def __init__(self, red_bit, yellow_bit, green_bit):
@@ -50,9 +50,11 @@ class Semaforo:
     self.state = OFF
 
   def set_state(self, state):
+    # Atualiza o estado atual do semáforo
     self.state = state
 
   def apply(self, buffer):
+    # Apaga os 3 LEDs do semáforo
     buffer[self.red_bit] = 0
     buffer[self.yellow_bit] = 0
     buffer[self.green_bit] = 0
@@ -67,7 +69,7 @@ class Semaforo:
     elif self.state == OFF:
       pass  # nenhum LED ligado
 
-# --------------------- SHIFT REGISTER ---------------
+# ------------------ SHIFT REGISTER ------------------
 
 def shift_out(byte1, byte2):
   latch.off()
@@ -108,108 +110,103 @@ def render():
 
   update_shift_register()
 
-# ------------- SISTEMA PRINCIPAL -------------------------
+# ------------------ SISTEMA PRINCIPAL ------------------
 
 class SistemaSemaforo:
-  def __init__(self, semaforos, sensores, botao, modos_config):
-    self.semaforos = semaforos
-    self.sensores = sensores
-    self.botao = botao
-    self.modos_config = modos_config
+    def __init__(self, semaforos, sensores, botao, modos_config):
+        self.semaforos = semaforos
+        self.sensores = sensores
+        self.botao = botao
+        self.modos_config = modos_config
 
-    self.tempo_ativo = [MIN_GREEN] * len(semaforos)
-    self.adicoes = [0] * len(semaforos)
-    self.tempo_amarelo = YELLOW_TIME
+        self.tempo_ativo = [MIN_GREEN] * len(semaforos)
+        self.adicoes = [0] * len(semaforos)
+        self.tempo_amarelo = YELLOW_TIME
 
-    self.modo = 0
-    self.fase = 0  # índice dentro do modo
+        self.modo = 0
+        self.fase = 0  # índice dentro do modo
 
-    self.last_press = 0
+        self.last_press = 0
 
-  # ----------- BOTÃO --------
-  def ler_botao(self):
-    if not self.botao.value():
-      agora = time.ticks_ms()
-      if time.ticks_diff(agora, self.last_press) > 200:
-        self.modo = (self.modo + 1) % len(self.modos_config)
-        self.fase = 0  # reinicia ciclo do modo
-        print("MODO:", self.modo)
-        self.last_press = agora
+    # -------- BOTÃO --------
+    def ler_botao(self):
+        if not self.botao.value():
+            agora = time.ticks_ms()
+            if time.ticks_diff(agora, self.last_press) > 200:
+                self.modo = (self.modo + 1) % len(self.modos_config)
+                self.fase = 0  # reinicia ciclo do modo
+                print("MODO:", self.modo)
+                self.last_press = agora
 
-  # ------- SENSORES ------------
-  def atualizar_tempos(self):
-    for i in range(len(self.sensores)):
-      if self.sensores[i].value() and self.adicoes[i] < MAX_ADD:
-        self.tempo_ativo[i] += INCREMENT
-        self.adicoes[i] += 1
+    # -------- SENSORES --------
+    def atualizar_tempos(self):
+        for i in range(len(self.sensores)):
+            if self.sensores[i].value() and self.adicoes[i] < MAX_ADD:
+              self.tempo_ativo[i] += INCREMENT
+              self.adicoes[i] += 1
 
-  # ------- GRUPO ATUAL ----------
-  def grupo_atual(self):
-    return self.modos_config[self.modo][self.fase]
+    # -------- GRUPO ATUAL --------
+    def grupo_atual(self):
+        return self.modos_config[self.modo][self.fase]
 
-  # --------- APLICAR ESTADO -------
-  def aplicar_estado(self, estado):
-    for i in self.grupo_atual():
-      self.semaforos[i].set_state(estado)
+    # -------- DESATIVA NÃO USADOS --------
+    def aplicar_off(self):
+        ativos_no_modo = set(sum(self.modos_config[self.modo], []))
 
-  # ------ DESATIVA NÃO USADOS -----------
-  def aplicar_off(self):
-    ativos_no_modo = set(sum(self.modos_config[self.modo], []))
+        for i in range(len(self.semaforos)):
+            if i not in ativos_no_modo:
+                self.semaforos[i].set_state(OFF)
 
-    for i in range(len(self.semaforos)):
-      if i not in ativos_no_modo:
-        self.semaforos[i].set_state(OFF)
+    # -------- PROXIMA FASE --------
+    def proxima_fase(self):
+        total_fases = len(self.modos_config[self.modo])
+        self.fase = (self.fase + 1) % total_fases
 
-  # ---------- AVANÇA FASE ---------
-  def proxima_fase(self):
-    total_fases = len(self.modos_config[self.modo])
-    self.fase = (self.fase + 1) % total_fases
+    # -------- TEMPO DO GRUPO --------
+    def tempo_grupo(self):
+        # usa o maior tempo entre os semáforos do grupo
+        return max([self.tempo_ativo[i] for i in self.grupo_atual()])
 
-  # ----------- TEMPO DO GRUPO ----------
-  def tempo_grupo(self):
-    # usa o maior tempo entre os semáforos do grupo
-    return max([self.tempo_ativo[i] for i in self.grupo_atual()])
+    # -------- RESET DO GRUPO --------
+    def reset_grupo(self):
+        for i in self.grupo_atual():
+            self.tempo_ativo[i] = MIN_GREEN
+            self.adicoes[i] = 0
 
-  # -------------- RESET DO GRUPO ----------
-  def reset_grupo(self):
-    for i in self.grupo_atual():
-      self.tempo_ativo[i] = MIN_GREEN
-      self.adicoes[i] = 0
+    # -------- CICLO --------
+    def atualizar_estado(self):
+        # todos começam vermelhos
+        for s in self.semaforos:
+            s.set_state(RED)
 
-  # -------------- CICLO ----------------
-  def atualizar_estado(self):
-    # todos começam vermelhos
-    for s in self.semaforos:
-      s.set_state(RED)
+        self.aplicar_off()
 
-    self.aplicar_off()
+        # VERDE
+        if self.tempo_grupo() > 0:
+            for i in self.grupo_atual():
+                self.semaforos[i].set_state(GREEN)
+                self.tempo_ativo[i] -= 1
 
-    # VERDE
-    if self.tempo_grupo() > 0:
-      self.aplicar_estado(GREEN)
+        # AMARELO
+        elif self.tempo_amarelo > 0:
+            for i in self.grupo_atual():
+                self.semaforos[i].set_state(YELLOW)
+            self.tempo_amarelo -= 1
 
-      for i in self.grupo_atual():
-        self.tempo_ativo[i] -= 1
+        # TROCA DE FASE
+        else:
+            self.reset_grupo()
+            self.tempo_amarelo = YELLOW_TIME
+            self.proxima_fase()
 
-    # AMARELO
-    elif self.tempo_amarelo > 0:
-      self.aplicar_estado(YELLOW)
-      self.tempo_amarelo -= 1
+    # -------- LOOP --------
+    def loop(self):
+        self.ler_botao()
+        self.atualizar_tempos()
+        self.atualizar_estado()
+        render()
 
-    # TROCA DE FASE
-    else:
-      self.reset_grupo()
-      self.tempo_amarelo = YELLOW_TIME
-      self.proxima_fase()
-
-  # ----------- LOOP -----------
-  def loop(self):
-    self.ler_botao()
-    self.atualizar_tempos()
-    self.atualizar_estado()
-    render()
-
-# -------------------- INICIALIZAÇÃO --------------------
+# ------------------ INICIALIZAÇÃO ------------------
 
 s1 = Semaforo(0, 1, 2)
 s2 = Semaforo(3, 4, 5)
@@ -221,15 +218,15 @@ semaforos = [s1, s2, s3, s4]
 ModosConfig = {
   0: [[0],[1],[2],[3]],
   1: [[0,2],[1,3]],
-  2: [[0],[1],[2]],
+  2: [[0],[2],[3]],
   3: [[0],[1]]
 }
 
 sistema = SistemaSemaforo(semaforos, sensores, botao, ModosConfig)
 
-# ---------------- LOOP PRINCIPAL ---------------------
+# ------------------ LOOP PRINCIPAL ------------------
 
 while True:
-  sistema.loop()
-  print(sistema.tempo_ativo)
-  time.sleep(1)
+    sistema.loop()
+    print(sistema.tempo_ativo)
+    time.sleep(1)
