@@ -73,7 +73,7 @@ Modo 3 → [ [0], [1] ]
 
 ### Entradas
 
-* 4 sensores PIR (movimento)
+* 4 sensores de movimento PIR
 * 1 botão (troca de modo)
 
 ### Função dos componentes
@@ -109,7 +109,8 @@ ModosConfig = {
 }
 ```
 
-Permite criar novos modos sem alterar a lógica interna
+- Permite criar novos modos sem alterar a lógica interna
+  - Se um mesmo semáforo está em duas fazes adjacentes, permanece verde entre fases, não passando por ciclo de `amarelo → vermelho` desnecessessáriamente. 
 
 ### Temporização
 
@@ -118,12 +119,13 @@ Permite criar novos modos sem alterar a lógica interna
 
   * Verde (dinâmico)
   * Amarelo (fixo)
+  * Todos vermelhos entre fases (fixo)
 
 ### Lógica adaptativa
 
 * Sensores aumentam tempo de verde (`INCREMENT`)
 * Limite de crescimento (`MAX_ADD`)
-* Mantém tempo mínimo com pouco movimento
+* Mantém tempo mínimo se houver pouco movimento
 
 ### Tratamento de botão
 
